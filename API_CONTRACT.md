@@ -1,18 +1,21 @@
 # CampuSphere – API contract (frontend ↔ backend)
 
-The frontend talks to the backend **only** through `frontend/src/api/` (one file per feature).
-Right now it uses fake data from `frontend/src/mock/data.js`. To switch to the real backend, create `frontend/.env`:
+The frontend (Next.js) talks to the backend **only** through `frontend/src/services/` (one file per feature).
+Right now it uses fake data from `frontend/src/mock/data.ts`. To switch to the real backend, create `frontend/.env.local` (then restart `npm run dev`):
 
 ```
-VITE_USE_MOCK=false
-VITE_API_URL=http://localhost:5000/api
+NEXT_PUBLIC_USE_MOCK=false
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
 ```
 
 All requests send/receive JSON (except note upload, which is `multipart/form-data`).
 After login, the frontend sends `Authorization: Bearer <token>` on every request.
+The frontend runs on `http://localhost:3000` in development, so the backend must allow that origin (CORS).
 On error, return a non-2xx status with `{ "message": "what went wrong" }`; the UI shows that message.
 
 ## Shapes
+
+The frontend has these as TypeScript types in `frontend/src/types/index.ts`. If you change a shape here, change it there too.
 
 ```js
 User         { id, name, handle, email, department, year, bio, skills: [string], followers, following, online }

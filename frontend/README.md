@@ -1,77 +1,108 @@
 # CampuSphere – Frontend
 
-React + Vite + Tailwind CSS. A campus notebook where students share notes, post, chat and find teammates.
+Next.js 16 (App Router) + React 19 + **TypeScript (strict)** + Tailwind CSS 4. A campus notebook where students share notes, post, chat and find teammates.
 This folder is **only the frontend**; the backend is a separate project.
+
+📒 **Full documentation (every file explained, with links): [../notes/README.md](../notes/README.md)**
 
 ## Run it
 
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run dev        # http://localhost:3000
 ```
 
-Open http://localhost:5173. In demo mode any email and password logs you in.
+In demo mode any email and password logs you in. Copy `.env.example` to `.env.local` to change settings.
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | start the app while you work (auto-reloads) |
+| `npm run build` | make the production version (also checks for errors) |
+| `npm start` | run the production version after `build` |
+| `npm run typecheck` | check all TypeScript types |
+| `npm run lint` | check the code for mistakes |
+| `npm run check` | typecheck + lint + build in one go |
 
 ## Folder map
 
 ```
 src/
-├── main.jsx            starts the app (router, login, pop-up messages)
-├── App.jsx             every page and its web address
-├── config.js           app name, university, streak rules, campus photos
-│
-├── pages/              one file per screen
-│   ├── FeedPage.jsx        home: composer + campus feed
-│   ├── NotesPage.jsx       notes library
-│   ├── TeamsPage.jsx       find teammates: Explore / Posted by you / Applied
-│   ├── MessagesPage.jsx    chats
-│   ├── ProfilePage.jsx     a student's profile
-│   └── LoginPage.jsx       log in / sign up
+├── app/                      PAGES — the folder path is the web address
+│   ├── layout.tsx                 the <html>, fonts, site title (every page)
+│   ├── globals.css               Tailwind + design colours, fonts, shadows
+│   ├── providers.tsx             login + pop-up messages for the whole app
+│   ├── not-found.tsx              "page not found"
+│   ├── error.tsx / global-error.tsx friendly crash pages
+│   ├── icon.svg                  the browser-tab icon
+│   ├── login/                    /login
+│   └── (main)/                   pages that need you to be logged in
+│       ├── layout.tsx                 adds the top bar, sidebars and phone menu
+│       ├── page.tsx + FeedView.tsx    /            the campus feed
+│       ├── notes/                    /notes       notes library
+│       ├── teams/                    /teams       Explore / Posted by you / Applied
+│       ├── messages/[[...chat]]/     /messages and /messages/c1
+│       └── u/[handle]/               /u/arpan     a student's profile
 │
 ├── components/
-│   ├── ui/             small building blocks: Button, Card, Chip, Modal, Avatar, FormFields…
-│   ├── layout/         page frame: TopBar, LeftSidebar, RightSidebar, MobileNav, background
-│   ├── feed/           PostCard, PostComposer, RichText (==highlights==)
-│   ├── notes/          NoteCard, NotePreviewModal, UploadNoteModal
-│   ├── teams/          ProjectCard, MyProjectCard, ApplicationCard, Apply/Reject/Create pop-ups
-│   ├── streak/         StreakChip (top bar), StreakCard (sidebar), StreakDetails
-│   └── trending/       TrendingCard (top 5)
+│   ├── ui/          small building blocks: Button, Card, Chip, Modal, Avatar, FormFields…
+│   ├── layout/      AppShell (frame + login check), TopBar, sidebars, MobileNav, background
+│   ├── feed/        PostCard, PostComposer, RichText (==highlights==)
+│   ├── notes/       NoteCard, NotePreviewModal, UploadNoteModal
+│   ├── teams/       ProjectCard, MyProjectCard, ApplicationCard, Apply/Reject/Create pop-ups
+│   ├── streak/      StreakChip (top bar), StreakCard (sidebar), StreakDetails
+│   └── trending/    TrendingCard (top 5)
 │
-├── api/                frontend calls to the backend, one file per feature
-│   ├── client.js           fetch helper + the mock switch
-│   └── index.js            puts them together as `api.something()`
-├── mock/data.js        fake data used until the backend is ready
-├── context/            app-wide state: AuthContext, StreakContext, ToastContext
-├── hooks/              useScrollToHash (jump to #post-p1 etc.)
-├── utils/              cn (join classes), colors, time helpers
-└── styles/index.css    Tailwind + design colours, fonts, shadows
+├── services/        frontend calls TO the backend, one file per feature (api.getFeed() …)
+├── mock/data.ts     fake data used until the backend is ready
+├── context/         app-wide state: Auth, Streak, Toast, Unread messages
+├── hooks/           useFocusFromUrl (?focus=post-p1 → scroll to that post)
+├── types/           TypeScript types for all data (match API_CONTRACT.md)
+├── utils/           cn, colors, time, links (safe URLs), session (saved login), upload checks
+├── assets/          the campus photo
+└── config.ts        app name, university, streak rules, campus photos
 ```
 
+In every route folder, **`page.tsx`** is the small Next.js file (page title + which view to show) and
+**`…View.tsx`** is the actual screen. Next.js tags interactive files with `'use client'` at the top.
+
 **Where do I change…**
-- a colour, font or shadow → `src/styles/index.css` (`@theme`)
-- the university name, streak minutes, background photo → `src/config.js`
-- what a page shows → `src/pages/…Page.jsx`
-- how a card looks → `src/components/<feature>/…Card.jsx`
-- the fake data → `src/mock/data.js`
+- a colour, font or shadow → `src/app/globals.css` (`@theme`)
+- the university name, streak minutes, background photo → `src/config.ts`
+- what a page shows → `src/app/(main)/<page>/…View.tsx`
+- a page's browser-tab title → that folder's `page.tsx` (`metadata`)
+- how a card looks → `src/components/<feature>/…Card.tsx`
+- the fake data → `src/mock/data.ts`
+
+## Next.js features used
+
+- **App Router**: folders in `src/app` are the pages; `(main)` groups the logged-in pages under one shared layout.
+- **`next/font`**: Bricolage Grotesque, DM Sans and Caveat are downloaded at build time (no flash, no Google request from the browser).
+- **`next/image`**: the campus photo is resized and compressed automatically, with a blurred preview while it loads.
+- **Metadata**: every page has its own tab title, e.g. "Notes Library · CampuSphere".
+- **Cache Components + Partial Prefetching** (`next.config.ts`): recently visited pages stay alive in the background, so going back is instant.
+
+The login is saved in the browser (localStorage), so the server first sends a loading screen and the browser fills in the page.
+That's why `next.config.ts` only runs Next's "instant navigation" checks on pages that opt in.
 
 ## Design: "Campus Notebook"
 
 Grid paper, 2px ink outlines, hard shadows, highlighter colours (`hl-yellow`, `hl-pink`, `hl-mint`, `hl-blue`, `hl-peach`, `hl-lilac`),
-Bricolage Grotesque headings (`font-display`), DM Sans text and Caveat handwriting (`font-hand`).
-Everything is styled with Tailwind classes.
+Bricolage Grotesque headings (`font-display`), DM Sans text and Caveat handwriting (`font-hand`). Everything is styled with Tailwind classes.
 
 ## Daily streak
 
 A day counts when the student **uses the app for 5 minutes** (tab open, and they moved the mouse or typed in the last minute)
 **or does any action**: post, reply, message, upload or open a note, like, save, apply to a team.
-The rules are in `src/config.js`; the tracking is in `src/context/StreakContext.jsx`.
+The rules are in `src/config.ts`; the tracking is in `src/context/StreakContext.tsx`.
 
 ## Connecting the backend
 
-The endpoints and data shapes are in [`../API_CONTRACT.md`](../API_CONTRACT.md). When the backend is running, create `frontend/.env`:
+The endpoints and data shapes are in [`../API_CONTRACT.md`](../API_CONTRACT.md). When the backend is running, create `frontend/.env.local`:
 
 ```
-VITE_USE_MOCK=false
-VITE_API_URL=http://localhost:5000/api
+NEXT_PUBLIC_USE_MOCK=false
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
 ```
+
+Then restart `npm run dev`.
