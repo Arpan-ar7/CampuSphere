@@ -1,0 +1,64 @@
+/* Loads Tailwind. All styling lives as Tailwind classes inside the .jsx files. */
+@import "tailwindcss";
+
+/*
+  "Campus Notebook" design tokens.
+  Each line becomes Tailwind classes, e.g. --color-hl-yellow → bg-hl-yellow / text-hl-yellow,
+  --shadow-ink → shadow-ink, --font-hand → font-hand.
+  Change a value here and it changes everywhere.
+*/
+@theme {
+  /* Fonts (loaded from Google Fonts in index.html) */
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "DM Sans", sans-serif;
+  --font-hand: "Caveat", cursive;
+
+  /* Paper and ink */
+  --color-ink: #1d1b16;
+  --color-paper: #fbf7ee;
+  --color-card: #fffdf7;
+  --color-gridline: #ebe4d3;
+
+  /* Highlighter colours */
+  --color-hl-yellow: #ffd84d;
+  --color-hl-pink: #ffb3d1;
+  --color-hl-mint: #9be7c4;
+  --color-hl-blue: #a8d4ff;
+  --color-hl-peach: #ffbf8f;
+  --color-hl-lilac: #cfc2ff;
+
+  /* Hard "cut-out" shadows */
+  --shadow-ink-sm: 2px 2px 0 #1d1b16;
+  --shadow-ink: 3px 3px 0 #1d1b16;
+  --shadow-ink-lg: 4px 4px 0 #1d1b16;
+
+  /* Small animations */
+  --animate-pop: pop 0.28s ease-out;
+  --animate-fade-up: fade-up 0.32s ease-out both;
+
+  @keyframes pop {
+    0% { transform: scale(0.85); }
+    60% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+  /* starts half-visible so content is never hidden if an animation is paused */
+  @keyframes fade-up {
+    from { opacity: 0.4; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* People who turn on "reduce motion" get no animations */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-pop {
+    animation: none;
+  }
+}
+
+/* Keyboard focus ring for every focusable element */
+@layer base {
+  :focus-visible {
+    @apply outline-[3px] outline-offset-2 outline-hl-blue;
+  }
+}
